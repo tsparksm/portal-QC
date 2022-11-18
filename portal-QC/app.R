@@ -31,6 +31,9 @@ ui <- fluidPage(
     ),
     
     # Tab selections: single site, Central Basin, Whidbey Basin
+    
+    # Test plot
+    plotOutput("test_plot")
 )
 
 # Define server logic
@@ -38,14 +41,13 @@ server <- function(input, output) {
     # Define discrete data path
     data_fpath <- here("data", "discrete_data.csv")
     
-    # Define initial data
+    # Define initial data and data date
+    if (!file.exists(data_fpath)) {
+        update_discrete()
+    }
     initial_data <- load_discrete()
     discrete_data <- reactiveValues(data = initial_data)
-    
-    # Define initial data date
-    old_date <- ifelse(file.exists(data_fpath), 
-                       substr(file.info(data_fpath)$mtime, 1, 10), 
-                       "")
+    old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
     file_date <- reactiveVal(old_date)
     
     # Update data and date text on button push - refresh_data
@@ -63,6 +65,20 @@ server <- function(input, output) {
         paste("Data last updated:", 
               file_date())
     )
+    
+    # Render simple plot
+    station <- "PENNCOVEENT"
+    plot_date <- reactive(max(discrete_data$data$CollectDate))
+    output$test_plot <- renderPlot({
+        ggplot(data = discrete_data$data %>% 
+                   filter(ParmId == 14, 
+                          CollectDate == plot_date()), 
+               aes(x = Depth, y = Value)) + 
+            labs() + 
+            geom_point() + 
+            coord_flip() + 
+            scale_x_reverse()
+    })
 }
 
 # Run the application 
