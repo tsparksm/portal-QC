@@ -23,7 +23,7 @@ update_discrete <- function() {
   sites <- site_data$Locator
   data("discrete_parms")
   parms <- discrete_parms$ParmName
-  download_discrete(sites, parms, fpath)
+  download_discrete(sites, parms, fpath, include_bad = TRUE)
 }
 
 # Load discrete data
