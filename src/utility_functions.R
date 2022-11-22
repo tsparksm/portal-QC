@@ -24,10 +24,14 @@ update_discrete <- function() {
   data("discrete_parms")
   parms <- discrete_parms$ParmName
   download_discrete(sites, parms, fpath, include_bad = TRUE)
+  initial_data <- import_discrete(fpath)
+  save(initial_data, 
+       file = here("data", "discrete_data.rda"))
 }
 
 # Load discrete data
 load_discrete <- function() {
-  fpath <- here("data", "discrete_data.csv")
-  import_discrete(fpath)
+  fpath <- here("data", "discrete_data.rda")
+  load(fpath)
+  return(initial_data)
 }
