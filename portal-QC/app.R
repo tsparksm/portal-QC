@@ -1,12 +1,4 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
+#### SETUP ####
 library(shiny)
 library(here)
 library(tidyverse)
@@ -14,6 +6,23 @@ library(kcmarine)
 library(ggvis)
 source(here("src", "utility_functions.R"))
 
+# Load in data - this happens before the app opens and may take a sec
+# TO DO: cache data as an .rda instead
+# Define discrete data path
+data_fpath <- here("data", "discrete_data.csv")
+
+# Define initial data and data date
+if (!file.exists(data_fpath)) {
+    update_discrete()
+}
+initial_data <- load_discrete()
+
+# Determine initial date, stations for tab 1 plot
+initial_stations <- sort(unique(initial_data$Locator))
+initial_date_1 <- initial_data$CollectDate[1]
+initial_station_1 <- initial_data$Locator[1]
+
+#### UI ####
 # Define UI for application
 ui <- fluidPage(
 
@@ -29,35 +38,50 @@ ui <- fluidPage(
         column(4, 
                textOutput("date_data"))
     ),
+    tags$hr(),
     
     # Tab selections: single site, Central Basin, Whidbey Basin
-    
-    # Test plot
-    plotOutput("test_plot")
+    tabsetPanel(
+        tabPanel("Single site", 
+                 fluidRow(
+                     column(2, 
+                            selectInput("sites", 
+                                        label = "Site:", 
+                                        choices = initial_stations, 
+                                        selected = initial_station_1))
+                 ), 
+                 # Test plot
+                 plotOutput("test_plot")
+        ), 
+        tabPanel("Central Basin", 
+        ), 
+        tabPanel("Whidbey Basin", 
+        )
+    )
 )
 
+#### SERVER ####
 # Define server logic
-server <- function(input, output) {
-    # Define discrete data path
-    data_fpath <- here("data", "discrete_data.csv")
-    
-    # Define initial data and data date
-    if (!file.exists(data_fpath)) {
-        update_discrete()
-    }
-    initial_data <- load_discrete()
+server <- function(input, output, session) {
+
     discrete_data <- reactiveValues(data = initial_data)
     old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
     file_date <- reactiveVal(old_date)
     
-    # Update data and date text on button push - refresh_data
+    # Update data and more on button push - refresh_data
     observeEvent(input$refresh_data, {
         update_discrete()
-        temp <- data.frame(load_discrete())
-        discrete_data$data <- temp
+        discrete_data$data <- load_discrete()
         
+        # "Last updated" date text
         new_date <- Sys.Date()
         file_date(new_date)
+        
+        # Station list - keep previous selection
+        updateSelectInput(session, 
+                          "sites", 
+                          choices = sort(unique(discrete_data$data$Locator)), 
+                          selected = input$sites)
     })
     
     # Render data date text
@@ -67,13 +91,14 @@ server <- function(input, output) {
     )
     
     # Render simple plot
-    station <- "PENNCOVEENT"
-    plot_date <- reactive(max(discrete_data$data$CollectDate))
     output$test_plot <- renderPlot({
         ggplot(data = discrete_data$data %>% 
                    filter(ParmId == 14, 
-                          CollectDate == plot_date()), 
-               aes(x = Depth, y = Value)) + 
+                          Locator == input$sites, 
+                          !is.na(Value), 
+                          !is.na(Depth), 
+                          !is.na(CollectDate)), 
+               aes(x = Depth, y = Value, color = CollectDate)) + 
             labs() + 
             geom_point() + 
             coord_flip() + 
@@ -81,5 +106,6 @@ server <- function(input, output) {
     })
 }
 
+#### RUN ####
 # Run the application 
 shinyApp(ui = ui, server = server)
