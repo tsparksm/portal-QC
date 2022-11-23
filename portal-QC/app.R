@@ -17,10 +17,14 @@ if (!file.exists(data_fpath)) {
 }
 initial_data <- load_discrete()
 
-# Determine initial date, stations for tab 1 plot
-initial_stations <- sort(unique(initial_data$Locator))
+# Determine initial date, stations for tab 1 (single site) plot
 initial_date_1 <- initial_data$CollectDate[1]
 initial_station_1 <- initial_data$Locator[1]
+initial_stations <- sort(unique(initial_data$Locator))
+initial_dates <- sort(unique(initial_data %>% 
+                                 filter(Locator == initial_station_1) %>% 
+                                 pull(CollectDate)), 
+                      decreasing = TRUE)
 
 #### UI ####
 # Define UI for application
@@ -38,6 +42,19 @@ ui <- fluidPage(
         column(4, 
                textOutput("date_data"))
     ),
+    
+    # Checkboxes
+    fluidRow(
+        column(3, 
+               checkboxInput("log", 
+                             "Nutrients & TSS on log scale", 
+                             value = FALSE)),
+        column(3, 
+               checkboxInput("include_bad", 
+                             "Include bad data (shown as squares)", 
+                             value = FALSE))
+    ), 
+    
     tags$hr(),
     
     # Tab selections: single site, Central Basin, Whidbey Basin
@@ -45,10 +62,15 @@ ui <- fluidPage(
         tabPanel("Single site", 
                  fluidRow(
                      column(2, 
-                            selectInput("sites", 
+                            selectInput("sites_1", 
                                         label = "Site:", 
                                         choices = initial_stations, 
-                                        selected = initial_station_1))
+                                        selected = initial_station_1)), 
+                     column(2, 
+                            selectInput("dates_1", 
+                                        label = "Date:", 
+                                        choices = initial_dates, 
+                                        selected = initial_date_1))
                  ), 
                  # Test plot
                  plotOutput("test_plot")
@@ -77,13 +99,35 @@ server <- function(input, output, session) {
         new_date <- Sys.Date()
         file_date(new_date)
         
-        # Station list - keep previous selection
+        # Station list tab 1 - keep previous selection
         updateSelectInput(session, 
-                          "sites", 
+                          "sites_1", 
                           choices = sort(unique(discrete_data$data$Locator)), 
                           selected = input$sites)
+        
+        # Date list tab 1 - automatically selects most recent
+        updateSelectInput(session, 
+                          "dates_1", 
+                          choices = sort(
+                              unique(
+                                  discrete_data$data %>% 
+                                      filter(Locator == input$sites) %>% 
+                                      pull(CollectDate)), 
+                              decreasing = TRUE))
     })
     
+    # Update tab 1 dates list if station selection changes; select most recent
+    observeEvent(input$sites_1, {
+        updateSelectInput(session, 
+                          "dates_1", 
+                          choices = sort(
+                              unique(
+                                  discrete_data$data %>% 
+                                      filter(Locator == input$sites_1) %>% 
+                                      pull(CollectDate)), 
+                              decreasing = TRUE))
+    })
+
     # Render data date text
     output$date_data <- renderText(
         paste("Data last updated:", 
@@ -94,11 +138,12 @@ server <- function(input, output, session) {
     output$test_plot <- renderPlot({
         ggplot(data = discrete_data$data %>% 
                    filter(ParmId == 14, 
-                          Locator == input$sites, 
+                          Locator == input$sites_1, 
                           !is.na(Value), 
                           !is.na(Depth), 
                           !is.na(CollectDate)), 
-               aes(x = Depth, y = Value, color = CollectDate)) + 
+               aes(x = Depth, y = Value, 
+                   color = CollectDate == input$dates_1)) + 
             labs() + 
             geom_point() + 
             coord_flip() + 
