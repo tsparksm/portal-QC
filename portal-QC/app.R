@@ -16,6 +16,7 @@ if (!file.exists(data_fpath)) {
     update_discrete()
 }
 initial_data <- load_discrete()
+old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
 
 # Determine initial date, stations for tab 1 (single site) plot
 initial_date_1 <- initial_data$CollectDate[1]
@@ -87,8 +88,12 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
     discrete_data <- reactiveValues(data = initial_data)
-    old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
     file_date <- reactiveVal(old_date)
+    
+    # Set scale setting
+    scale_setting <- reactive({
+        ifelse(input$log, "log", "linear")
+    })
     
     # Update data and more on button push - refresh_data
     observeEvent(input$refresh_data, {
