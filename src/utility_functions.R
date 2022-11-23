@@ -16,7 +16,7 @@ load_site <- function() {
     mutate(Shallow = if_else(is.na(Shallow), FALSE, TRUE))
 }
 
-# Update discrete data file w/ all available marine bottle data
+# Update discrete data file w/ all available marine bottle data, save as .rda
 update_discrete <- function() {
   fpath <- here("data", "discrete_data.csv")
   site_data <- load_site()
@@ -29,9 +29,21 @@ update_discrete <- function() {
        file = here("data", "discrete_data.rda"))
 }
 
-# Load discrete data
+# Load discrete data from .rda
 load_discrete <- function() {
   fpath <- here("data", "discrete_data.rda")
   load(fpath)
   return(initial_data)
+}
+
+# Process discrete data - update values, sort
+process_discrete <- function(discrete_data) {
+  new_data <- discrete_data %>% 
+    mutate(Value = ifelse(!is.na(OverrideValue), 
+                          OverrideValue, 
+                          Value), 
+           NonDetect = grepl("<MDL", QfrCode), 
+           Value = ifelse(NonDetect, Mdl, Value)) %>% 
+    filter(!is.na(Value)) %>% 
+    arrange(CollectDate, ParmDisplayName, Depth)
 }

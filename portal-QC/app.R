@@ -15,7 +15,7 @@ data_fpath <- here("data", "discrete_data.csv")
 if (!file.exists(data_fpath)) {
     update_discrete()
 }
-initial_data <- load_discrete()
+initial_data <- process_discrete(load_discrete())
 old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
 
 # Determine initial date, stations for tab 1 (single site) plot
@@ -98,7 +98,7 @@ server <- function(input, output, session) {
     # Update data and more on button push - refresh_data
     observeEvent(input$refresh_data, {
         update_discrete()
-        discrete_data$data <- load_discrete()
+        discrete_data$data <- process_discrete(load_discrete())
         
         # "Last updated" date text
         new_date <- Sys.Date()
@@ -144,9 +144,7 @@ server <- function(input, output, session) {
         ggplot(data = discrete_data$data %>% 
                    filter(ParmId == 14, 
                           Locator == input$sites_1, 
-                          !is.na(Value), 
-                          !is.na(Depth), 
-                          !is.na(CollectDate)), 
+                          !is.na(Depth)), 
                aes(x = Depth, y = Value, 
                    color = CollectDate == input$dates_1)) + 
             labs() + 
