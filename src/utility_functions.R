@@ -1,3 +1,30 @@
+# Set parameters to display
+parms <- c("Temperature", 
+           "Dissolved Oxygen", 
+           "Dissolved Oxygen, Field", 
+           "pH", 
+           "pH, Field",
+           "Density", 
+           "Salinity", 
+           "Salinity, Field", 
+           "Orthophosphate Phosphorus", 
+           "Total Phosphorus", 
+           "Ammonia Nitrogen", 
+           "Nitrite + Nitrate Nitrogen", 
+           "Total Nitrogen", 
+           "Chlorophyll a", 
+           "Chlorphyll, Field", 
+           "Pheophytin a", 
+           "Light Intensity (PAR)", 
+           "Light Transmissivity", 
+           "Total Suspended Solids", 
+           "Surface Light Intensity (PAR)", 
+           "Silica", 
+           "Total Organic Carbon", 
+           "Dissolved Organic Carbon", 
+           "Fecal Coliform", 
+           "Enterococcus")
+
 # Load site data downloaded from Monitoring Portal
 load_site <- function() {
   fpath <- here("data", "marine_sites.txt")
@@ -39,11 +66,26 @@ load_discrete <- function() {
 # Process discrete data - update values, sort
 process_discrete <- function(discrete_data) {
   new_data <- discrete_data %>% 
-    mutate(Value = ifelse(!is.na(OverrideValue), 
+    filter(ParmDisplayName %in% parms) %>% 
+    transmute(Locator = Locator, 
+              CollectDate = CollectDate, 
+              Value = ifelse(!is.na(OverrideValue), 
                           OverrideValue, 
                           Value), 
-           NonDetect = grepl("<MDL", QfrCode), 
-           Value = ifelse(NonDetect, Mdl, Value)) %>% 
+              MDL = Mdl, 
+              RDL = Rdl, 
+              Depth = Depth, 
+              Year = year(CollectDate), 
+              Month = month(CollectDate), 
+              SampleID = as.character(SampleId), 
+              LabSampleNum = LabSampleNum, 
+              Parameter = factor(ParmDisplayName, 
+                                 levels = parms), 
+              Units = Units, 
+              Qualifier = QfrCode, 
+              QualityID = QualityId, 
+              NonDetect = grepl("<MDL", Qualifier)) %>%  
+    mutate(Value = ifelse(NonDetect, MDL, Value)) %>% 
     filter(!is.na(Value)) %>% 
-    arrange(CollectDate, ParmDisplayName, Depth)
+    arrange(CollectDate, Parameter, Depth)
 }
