@@ -91,11 +91,6 @@ server <- function(input, output, session) {
     discrete_data <- reactiveValues(data = initial_data)
     file_date <- reactiveVal(old_date)
     
-    # Set shape for bad data
-    shape_setting <- reactive({
-        ifelse(input$include_bad, 15, NA)
-    })
-    
     # Update data and more on button push - refresh_data
     observeEvent(input$refresh_data, {
         update_discrete()
@@ -148,7 +143,8 @@ server <- function(input, output, session) {
                                !is.na(Depth)) %>% 
                         mutate(Shape = case_when(QualityID == 4 ~ "Bad", 
                                                  NonDetect == TRUE ~ "ND", 
-                                                 TRUE ~ "Regular")), 
+                                                 TRUE ~ "Regular")) %>% 
+                        {if (input$include_bad) . else filter(., QualityID != 4)},  
                aes(x = Depth, y = Value, 
                    color = CollectDate == input$dates_1, 
                    shape = Shape, 
@@ -164,7 +160,7 @@ server <- function(input, output, session) {
             scale_x_reverse() + 
             scale_color_manual(values = c("TRUE" = "red", 
                                           "FALSE" = "black")) + 
-            scale_shape_manual(values = c("Bad" = shape_setting(), 
+            scale_shape_manual(values = c("Bad" = 15, 
                                           "ND" = 6, 
                                           "Regular" = 16))
         pp <- ggplotly(p, tooltip = c("text"))
