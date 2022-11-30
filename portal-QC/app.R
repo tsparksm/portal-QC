@@ -3,11 +3,12 @@ library(shiny)
 library(here)
 library(tidyverse)
 library(kcmarine)
-library(ggvis)
+library(plotly)
+library(lubridate)
+library(htmlwidgets)
 source(here("src", "utility_functions.R"))
 
-# Load in data - this happens before the app opens and may take a sec
-# TO DO: cache data as an .rda instead
+## Load in data
 # Define discrete data path
 data_fpath <- here("data", "discrete_data.csv")
 
@@ -74,7 +75,7 @@ ui <- fluidPage(
                                         selected = initial_date_1))
                  ), 
                  # Test plot
-                 plotOutput("test_plot")
+                 plotlyOutput("test_plot")
         ), 
         tabPanel("Central Basin", 
         ), 
@@ -90,9 +91,9 @@ server <- function(input, output, session) {
     discrete_data <- reactiveValues(data = initial_data)
     file_date <- reactiveVal(old_date)
     
-    # Set scale setting
-    scale_setting <- reactive({
-        ifelse(input$log, "log", "linear")
+    # Set shape for bad data
+    shape_setting <- reactive({
+        ifelse(input$include_bad, 15, NA)
     })
     
     # Update data and more on button push - refresh_data
@@ -140,17 +141,43 @@ server <- function(input, output, session) {
     )
     
     # Render simple plot
-    output$test_plot <- renderPlot({
-        ggplot(data = discrete_data$data %>% 
-                   filter(ParmId == 14, 
-                          Locator == input$sites_1, 
-                          !is.na(Depth)), 
+    output$test_plot <- renderPlotly({
+        p <- ggplot(data = discrete_data$data %>% 
+                        filter(Parameter == "Nitrite + Nitrate Nitrogen", 
+                               Locator == input$sites_1, 
+                               !is.na(Depth)) %>% 
+                        mutate(Shape = case_when(QualityID == 4 ~ "Bad", 
+                                                 NonDetect == TRUE ~ "ND", 
+                                                 TRUE ~ "Regular")), 
                aes(x = Depth, y = Value, 
-                   color = CollectDate == input$dates_1)) + 
-            labs() + 
+                   color = CollectDate == input$dates_1, 
+                   shape = Shape, 
+                   customdata = URL, 
+                   text = paste0(Value, "; ", CollectDate))) + 
+            theme_bw() + 
+            theme(legend.position = "none") +
+            labs(x = "Depth (m)", 
+                 y = "Nitrate + nitrite N (mg/L)") + 
             geom_point() + 
             coord_flip() + 
-            scale_x_reverse()
+            {if (input$log) scale_y_continuous(trans = "log")} + 
+            scale_x_reverse() + 
+            scale_color_manual(values = c("TRUE" = "red", 
+                                          "FALSE" = "black")) + 
+            scale_shape_manual(values = c("Bad" = shape_setting(), 
+                                          "ND" = 6, 
+                                          "Regular" = 16))
+        pp <- ggplotly(p, tooltip = c("text"))
+        onRender(
+            pp, "
+            function(el) {
+            el.on('plotly_click', function(d) {
+            var url = d.points[0].customdata;
+            //url
+            window.open(url);
+            }); 
+            }"
+        )
     })
 }
 
