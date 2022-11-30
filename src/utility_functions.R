@@ -84,8 +84,9 @@ process_discrete <- function(discrete_data) {
               Units = Units, 
               Qualifier = QfrCode, 
               QualityID = QualityId, 
-              NonDetect = grepl("<MDL", Qualifier)) %>%  
+              NonDetect = grepl("<MDL", Qualifier), 
+              URL = paste0("http://dnrp-apps2/Monitoring-Portal/Sample/Edit/?lsn=", 
+                           LabSampleNum)) %>%  
     mutate(Value = ifelse(NonDetect, MDL, Value)) %>% 
-    filter(!is.na(Value)) %>% 
-    arrange(CollectDate, Parameter, Depth)
+    filter(!is.na(Value))
 }
