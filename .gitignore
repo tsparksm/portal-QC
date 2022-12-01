@@ -2,4 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-data/
+data/discrete_data.csv
+data/discrete_data.rda
