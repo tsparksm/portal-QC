@@ -8,6 +8,9 @@ library(lubridate)
 library(htmlwidgets)
 source(here("src", "utility_functions.R"))
 
+# Suppress warnings (just for cleanliness)
+options(warn = -1) 
+
 ## Load in data
 # Define discrete data path
 data_fpath <- here("data", "discrete_data.csv")
@@ -74,8 +77,58 @@ ui <- fluidPage(
                                         choices = initial_dates, 
                                         selected = initial_date_1))
                  ), 
-                 # Test plot
-                 plotlyOutput("test_plot")
+                 # Plots!
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_T")), 
+                     column(4, plotlyOutput("plot_oss_density"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_DOfield")), 
+                     column(4, plotlyOutput("plot_oss_DO"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_Sfield")), 
+                     column(4, plotlyOutput("plot_oss_S"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_pHfield")), 
+                     column(4, plotlyOutput("plot_oss_pH"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_P")), 
+                     column(4, plotlyOutput("plot_oss_TotalP"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_NH3")), 
+                     column(4, plotlyOutput("plot_oss_NNN"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_TotalN")), 
+                     column(4, plotlyOutput("plot_oss_TSS"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_PAR")), 
+                     column(4, plotlyOutput("plot_oss_sPAR"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_light")), 
+                     column(4, plotlyOutput("plot_oss_chl"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_pheo")), 
+                     column(4, plotlyOutput("plot_oss_chlfield"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_Si")), 
+                     column(4, plotlyOutput("plot_oss_TOC"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_DOC")), 
+                     column(4, plotlyOutput("plot_oss_fecal"))
+                 ), 
+                 fluidRow(
+                     column(4, plotlyOutput("plot_oss_entero"))
+                 )
         ), 
         tabPanel("Central Basin", 
         ), 
@@ -135,46 +188,8 @@ server <- function(input, output, session) {
               file_date())
     )
     
-    # Render simple plot
-    output$test_plot <- renderPlotly({
-        p <- ggplot(data = discrete_data$data %>% 
-                        filter(Parameter == "Nitrite + Nitrate Nitrogen", 
-                               Locator == input$sites_1, 
-                               !is.na(Depth)) %>% 
-                        mutate(Shape = case_when(QualityID == 4 ~ "Bad", 
-                                                 NonDetect == TRUE ~ "ND", 
-                                                 TRUE ~ "Regular")) %>% 
-                        {if (input$include_bad) . else filter(., QualityID != 4)},  
-               aes(x = Depth, y = Value, 
-                   color = CollectDate == input$dates_1, 
-                   shape = Shape, 
-                   customdata = URL, 
-                   text = paste0(Value, "; ", CollectDate))) + 
-            theme_bw() + 
-            theme(legend.position = "none") +
-            labs(x = "Depth (m)", 
-                 y = "Nitrate + nitrite N (mg/L)") + 
-            geom_point() + 
-            coord_flip() + 
-            {if (input$log) scale_y_continuous(trans = "log")} + 
-            scale_x_reverse() + 
-            scale_color_manual(values = c("TRUE" = "red", 
-                                          "FALSE" = "black")) + 
-            scale_shape_manual(values = c("Bad" = 15, 
-                                          "ND" = 6, 
-                                          "Regular" = 16))
-        pp <- ggplotly(p, tooltip = c("text"))
-        onRender(
-            pp, "
-            function(el) {
-            el.on('plotly_click', function(d) {
-            var url = d.points[0].customdata;
-            //url
-            window.open(url);
-            }); 
-            }"
-        )
-    })
+    # Render offshore single site plots
+    source(here("portal-QC", "make_plots_oss.R"), local = TRUE)
 }
 
 #### RUN ####
