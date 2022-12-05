@@ -12,9 +12,6 @@ source(here("src", "utility_functions.R"))
 options(warn = -1) 
 
 ## Load in data
-# Define discrete data path
-data_fpath <- here("data", "discrete_data.csv")
-
 # Define initial data and data date
 if (!file.exists(data_fpath)) {
     update_discrete()

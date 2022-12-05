@@ -25,6 +25,14 @@ parms <- c("Temperature",
            "Fecal Coliform", 
            "Enterococcus")
 
+# Define discrete data path
+Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
+data_fpath <- paste(Z_drive, 
+                    "MarinePortal", 
+                    "WaterQuality", 
+                    "Shiny", 
+                    "discrete_data.rda", sep = "/")
+
 # Load site data downloaded from Monitoring Portal
 load_site <- function() {
   fpath <- here("data", "marine_sites.txt")
@@ -45,7 +53,12 @@ load_site <- function() {
 
 # Update discrete data file w/ all available marine bottle data, save as .rda
 update_discrete <- function() {
-  fpath <- here("data", "discrete_data.csv")
+  Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
+  data_fpath <- paste(Z_drive, 
+                      "MarinePortal", 
+                      "WaterQuality", 
+                      "Shiny", sep = "/")
+  fpath <- paste(data_fpath, "discrete_data.csv", sep = "/")
   site_data <- load_site()
   sites <- site_data$Locator
   data("discrete_parms")
@@ -53,12 +66,17 @@ update_discrete <- function() {
   download_discrete(sites, parms, fpath, include_bad = TRUE)
   initial_data <- import_discrete(fpath)
   save(initial_data, 
-       file = here("data", "discrete_data.rda"))
+       file = paste(data_fpath, "discrete_data.rda", sep = "/"))
 }
 
 # Load discrete data from .rda
 load_discrete <- function() {
-  fpath <- here("data", "discrete_data.rda")
+  Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
+  data_fpath <- paste(Z_drive, 
+                      "MarinePortal", 
+                      "WaterQuality", 
+                      "Shiny", sep = "/")
+  fpath <- paste(data_fpath, "discrete_data.rda", sep = "/")
   load(fpath)
   return(initial_data)
 }
