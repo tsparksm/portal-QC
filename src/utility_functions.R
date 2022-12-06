@@ -1,29 +1,77 @@
 # Set parameters to display
 parms <- c("Temperature", 
+           "Density", 
+           "Salinity", 
+           "Salinity, Field", 
            "Dissolved Oxygen", 
            "Dissolved Oxygen, Field", 
            "pH", 
            "pH, Field",
-           "Density", 
-           "Salinity", 
-           "Salinity, Field", 
            "Orthophosphate Phosphorus", 
            "Total Phosphorus", 
            "Ammonia Nitrogen", 
            "Nitrite + Nitrate Nitrogen", 
            "Total Nitrogen", 
-           "Chlorophyll a", 
-           "Chlorphyll, Field", 
-           "Pheophytin a", 
-           "Light Intensity (PAR)", 
-           "Light Transmissivity", 
-           "Total Suspended Solids", 
-           "Surface Light Intensity (PAR)", 
            "Silica", 
+           "Total Suspended Solids", 
+           "Light Transmissivity", 
+           "Light Intensity (PAR)", 
+           "Surface Light Intensity (PAR)", 
+           "Chlorophyll a", 
+           "Chlorophyll, Field", 
+           "Pheophytin a", 
            "Total Organic Carbon", 
            "Dissolved Organic Carbon", 
            "Fecal Coliform", 
-           "Enterococcus")
+           "Enterococcus"
+)
+
+# Set parameter units for axis labels
+parm_units <- tibble(Parameter = parms, 
+                     Label = c("Temperature (\u00B0C)", 
+                               "Density (kg/m<sup>3</sup>)", 
+                               "Salinity (PSU)", 
+                               "Salinity, Field (PSU)", 
+                               "Dissolved Oxygen (mg/L)", 
+                               "Dissolved Oxygen, Field (mg/L)", 
+                               "pH", 
+                               "pH, Field", 
+                               "Orthophosphate Phosphorus (mg/L)", 
+                               "Total Phosphorus (mg/L)", 
+                               "Ammonia Nitrogen (mg/L)", 
+                               "Nitrate + Nitrite Nitrogen (mg/L)", 
+                               "Total Nitrogen (mg/L)", 
+                               "Silica (mg/L)", 
+                               "Total Suspended Solids (mg/L)", 
+                               "Light Transmissivity (%)", 
+                               "PAR (\u00B5mol/sm<sup>2</sup>)", 
+                               "Surface PAR (\u00B5mol/sm<sup>2</sup>)", 
+                               "Chlorophyll <i>a</i> (\u00B5g/L)", 
+                               "Chlorophyll <i>a</i>, Field (\u00B5g/L)", 
+                               "Pheophytin <i>a</i> (\u00B5g/L)", 
+                               "Total Organic Carbon (mg/L)", 
+                               "Dissolved Organic Carbon (mg/L)", 
+                               "Fecal Coliform (CFU/100 mL)", 
+                               "Enterococcus (CFU/100 mL)"))
+
+# Set Central Basin sites (tab 2)
+locators_cb <-  c("JSUR01", "KSBP01", "CK200P", "KSSK02", 
+                  "LTBC43", "LTED04", "SEAQYSI", "LSEP01", 
+                  "LSKQ06", "LSNT01", "PTWILLBUOY", "LSVV01", 
+                  "MSJN02", "MSWH01", "NSAJ02", "NSEX01")
+
+# Set Whidbey Basin sites (tab 3)
+locators_wb <- c("SARATOGACH", "PSUSANBUOY", 
+                 "PENNCOVEENT", "PENNCOVECW", "PENNCOVEWEST")
+
+# Identify parameters to have log-scaling
+parms_log <- c("Orthophosphate Phosphorus", 
+               "Total Phosphorus", 
+               "Ammonia Nitrogen", 
+               "Nitrite + Nitrate Nitrogen", 
+               "Total Nitrogen", 
+               "Total Suspended Solids", 
+               "Silica")
 
 # Define discrete data path
 Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
