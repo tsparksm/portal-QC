@@ -23,10 +23,26 @@ old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
 initial_date_1 <- initial_data$CollectDate[1]
 initial_station_1 <- initial_data$Locator[1]
 initial_stations <- sort(unique(initial_data$Locator))
-initial_dates <- sort(unique(initial_data %>% 
+initial_dates_1 <- sort(unique(initial_data %>% 
                                  filter(Locator == initial_station_1) %>% 
                                  pull(CollectDate)), 
                       decreasing = TRUE)
+
+# Determine initial date range for tab 2 (Central Basin) plot
+initial_dates_2 <- unique(initial_data %>% 
+                            filter(Locator %in% locators_cb) %>% 
+                            arrange(CollectDate, decreasing = FALSE) %>% 
+                            mutate(WeekDate = rev(factor(WeekDate))) %>% 
+                            pull(WeekDate))
+initial_date_2 <- initial_dates_2[1]
+
+# Determine initial date range for tab 3 (Whidbey Basin) plot
+initial_dates_3 <- unique(initial_data %>% 
+                              filter(Locator %in% locators_wb) %>% 
+                              arrange(CollectDate, decreasing = FALSE) %>% 
+                              mutate(WeekDate = rev(factor(WeekDate))) %>% 
+                              pull(WeekDate))
+initial_date_3 <- initial_dates_3[1]
 
 #### UI ####
 # Define UI for application
@@ -71,7 +87,7 @@ ui <- fluidPage(
                      column(2, 
                             selectInput("dates_1", 
                                         label = "Date:", 
-                                        choices = initial_dates, 
+                                        choices = initial_dates_1, 
                                         selected = initial_date_1))
                  ), 
                  # Plots!
@@ -128,8 +144,40 @@ ui <- fluidPage(
                  )
         ), 
         tabPanel("Central Basin", 
+                 fluidRow(
+                     column(2, 
+                            selectInput("parm_2", 
+                                        label = "Parameter:", 
+                                        choices = parms, 
+                                        selected = parms[1])), 
+                     column(2, 
+                            selectInput("dates_2", 
+                                        label = "Date:", 
+                                        choices = initial_dates_2, 
+                                        selected = initial_date_2))
+                 ), 
+                 fluidRow(
+                     column(8, plotlyOutput("plot_cb", 
+                                            height = "1600px"))
+                 )
         ), 
         tabPanel("Whidbey Basin", 
+                 fluidRow(
+                     column(2, 
+                            selectInput("parm_3", 
+                                        label = "Parameter:", 
+                                        choices = parms, 
+                                        selected = parms[1])), 
+                     column(2, 
+                            selectInput("dates_3", 
+                                        label = "Date:", 
+                                        choices = initial_dates_3, 
+                                        selected = initial_date_3))
+                 ), 
+                 fluidRow(
+                     column(8, plotlyOutput("plot_wb", 
+                                            height = "800px"))
+                 ) 
         )
     )
 )
@@ -186,7 +234,13 @@ server <- function(input, output, session) {
     )
     
     # Render offshore single site plots
-    source(here("portal-QC", "make_plots_oss.R"), local = TRUE)
+    source(here("src", "make_plots_oss.R"), local = TRUE)
+    
+    # Render offshore Central Basin plots
+    source(here("src", "make_plots_cb.R"), local = TRUE)
+    
+    # Render offshore Whidbey Basin plots
+    source(here("src", "make_plots_wb.R"), local = TRUE)
 }
 
 #### RUN ####
