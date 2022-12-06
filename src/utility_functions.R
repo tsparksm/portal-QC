@@ -152,7 +152,12 @@ process_discrete <- function(discrete_data) {
               QualityID = QualityId, 
               NonDetect = grepl("<MDL", Qualifier), 
               URL = paste0("http://dnrp-apps2/Monitoring-Portal/Sample/Edit/?lsn=", 
-                           LabSampleNum)) %>%  
+                           LabSampleNum), 
+              WeekDate = paste("Week", 
+                               isoweek(CollectDate), 
+                               "-" , 
+                               month.abb[month(CollectDate)], 
+                               year(CollectDate))) %>%  
     mutate(Value = ifelse(NonDetect, MDL, Value)) %>% 
     filter(!is.na(Value))
 }
