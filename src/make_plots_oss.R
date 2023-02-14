@@ -92,7 +92,7 @@ output$plot_oss_DOfield <- renderPlotly({
     theme_bw() + 
     theme(legend.position = "none") +
     labs(x = "Depth (m)", 
-         y = "DO, Field (kg/m<sup>3</sup>)") + 
+         y = "DO, Field (mg/L)") + 
     coord_flip() + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
@@ -133,7 +133,7 @@ output$plot_oss_DO <- renderPlotly({
     theme_bw() + 
     theme(legend.position = "none") +
     labs(x = "Depth (m)", 
-         y = "DO (kg/m<sup>3</sup>)") + 
+         y = "DO (mg/L)") + 
     coord_flip() + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
