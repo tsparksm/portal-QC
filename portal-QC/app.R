@@ -13,11 +13,11 @@ options(warn = -1)
 
 ## Load in data
 # Define initial data and data date
-if (!file.exists(data_fpath)) {
+if (!file.exists(data_fpath_rda)) {
     update_discrete()
 }
 initial_data <- process_discrete(load_discrete())
-old_date <- substr(file.info(data_fpath)$mtime, 1, 10)
+old_date <- substr(file.info(data_fpath_rda)$mtime, 1, 10)
 
 # Determine initial date, stations for tab 1 (single site) plot
 initial_date_1 <- initial_data$CollectDate[1]
