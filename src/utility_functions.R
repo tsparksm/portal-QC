@@ -78,13 +78,37 @@ Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
 data_fpath <- paste(Z_drive, 
                     "MarinePortal", 
                     "WaterQuality", 
-                    "Shiny", 
+                    "ShinyOffshore", 
                     "discrete_data.rda", sep = "/")
 site_fpath <- paste(Z_drive, 
                     "MarinePortal", 
                     "WaterQuality", 
-                    "Shiny", 
+                    "ShinyOffshore", 
                     "marine_sites.txt", sep = "/")
+
+# Update site data downloaded from Monitoring Portal
+# There is no option to do this from the app; needs to be manual update
+update_site <- function() {
+  if (is.na(Sys.getenv("site_user", unset = NA))) {
+    Sys.setenv(site_user = getPass::getPass(msg = "Enter username"))
+    Sys.setenv(site_pw = getPass::getPass(msg = "Enter password"))
+  }
+  
+  webpage <- "http://dnrp-apps2/Monitoring-Portal/Sites?SiteType=254&pageSize=1000"
+  
+  tt <- RCurl::getURL(webpage, 
+                      userpwd = paste(Sys.getenv("site_user"), 
+                                      Sys.getenv("site_pw"), 
+                                      sep = ":"))
+  sites <- XML::readHTMLTable(tt, 
+                              stringsAsFactors = FALSE)[[1]]
+  colnames(sites) <- c("Details", "SiteID", "SiteName", "Locator", "Latitude", 
+                       "Longitude", "Shallow", "SiteType", "Area")
+  sites <- sites %>% 
+    select(!Details) %>% 
+    mutate(Shallow = if_else(is.na(Shallow), FALSE, TRUE))
+  write_tsv(sites, site_fpath)
+}
 
 # Load site data downloaded from Monitoring Portal
 load_site <- function() {
