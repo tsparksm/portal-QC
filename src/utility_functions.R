@@ -75,11 +75,16 @@ parms_log <- c("Orthophosphate Phosphorus",
 
 # Define discrete data path
 Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
-data_fpath <- paste(Z_drive, 
-                    "MarinePortal", 
-                    "WaterQuality", 
-                    "ShinyOffshore", 
-                    "discrete_data.rda", sep = "/")
+data_fpath_rda <- paste(Z_drive, 
+                        "MarinePortal", 
+                        "WaterQuality", 
+                        "ShinyOffshore", 
+                        "discrete_data.rda", sep = "/")
+data_fpath_csv <- paste(Z_drive, 
+                        "MarinePortal", 
+                        "WaterQuality", 
+                        "ShinyOffshore", 
+                        "discrete_data.csv", sep = "/")
 site_fpath <- paste(Z_drive, 
                     "MarinePortal", 
                     "WaterQuality", 
@@ -113,47 +118,32 @@ update_site <- function() {
 # Load site data downloaded from Monitoring Portal
 load_site <- function() {
   read_tsv(site_fpath, 
-           col_types = cols(`Site ID` = col_character(), 
-                            `Site Name` = col_character(), 
+           col_types = cols(SiteID = col_character(), 
+                            SiteName = col_character(), 
                             Locator = col_character(), 
                             Latitude = col_double(), 
                             Longitude = col_double(), 
                             Shallow = col_logical(), 
-                            `Site Type` = col_character(), 
+                            SiteType = col_character(), 
                             Area = col_character())) %>% 
-    rename(SiteID = `Site ID`, 
-           SiteName = `Site Name`, 
-           SiteType = `Site Type`) %>% 
     mutate(Shallow = if_else(is.na(Shallow), FALSE, TRUE))
 }
 
 # Update discrete data file w/ all available marine bottle data, save as .rda
 update_discrete <- function() {
-  Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
-  data_fpath <- paste(Z_drive, 
-                      "MarinePortal", 
-                      "WaterQuality", 
-                      "Shiny", sep = "/")
-  fpath <- paste(data_fpath, "discrete_data.csv", sep = "/")
   site_data <- load_site()
   sites <- site_data$Locator
   data("discrete_parms")
   parms <- discrete_parms$ParmName
-  download_discrete(sites, parms, fpath, include_bad = TRUE)
-  initial_data <- import_discrete(fpath)
+  download_discrete(sites, parms, data_fpath_csv, include_bad = TRUE)
+  initial_data <- import_discrete(data_fpath_csv)
   save(initial_data, 
-       file = paste(data_fpath, "discrete_data.rda", sep = "/"))
+       file = data_fpath_rda)
 }
 
 # Load discrete data from .rda
 load_discrete <- function() {
-  Z_drive <- "//kc.kingcounty.lcl/dnrp/WLRD/STS/Share/Marine Group/"
-  data_fpath <- paste(Z_drive, 
-                      "MarinePortal", 
-                      "WaterQuality", 
-                      "Shiny", sep = "/")
-  fpath <- paste(data_fpath, "discrete_data.rda", sep = "/")
-  load(fpath)
+  load(data_fpath_rda)
   return(initial_data)
 }
 
