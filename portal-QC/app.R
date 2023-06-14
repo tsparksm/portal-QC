@@ -202,7 +202,7 @@ server <- function(input, output, session) {
         updateSelectInput(session, 
                           "sites_1", 
                           choices = sort(unique(discrete_data$data$Locator)), 
-                          selected = input$sites)
+                          selected = input$sites_1)
         
         # Date list tab 1 - automatically selects most recent
         updateSelectInput(session, 
@@ -210,9 +210,31 @@ server <- function(input, output, session) {
                           choices = sort(
                               unique(
                                   discrete_data$data %>% 
-                                      filter(Locator == input$sites) %>% 
+                                      filter(Locator == input$sites_1) %>% 
                                       pull(CollectDate)), 
                               decreasing = TRUE))
+        
+        # Date list tab 2 - automatically selects most recent
+        updateSelectInput(session, 
+                          "dates_2", 
+                          choices = unique(
+                            discrete_data$data %>% 
+                              filter(Locator %in% locators_cb) %>% 
+                              arrange(CollectDate, decreasing = FALSE) %>% 
+                              mutate(WeekDate = rev(factor(WeekDate))) %>% 
+                              pull(WeekDate)
+                          ))
+        
+        # Date list tab 3 - automatically selects most recent
+        updateSelectInput(session, 
+                          "dates_3", 
+                          choices = unique(
+                            discrete_data$data %>% 
+                              filter(Locator %in% locators_wb) %>% 
+                              arrange(CollectDate, decreasing = FALSE) %>% 
+                              mutate(WeekDate = rev(factor(WeekDate))) %>% 
+                              pull(WeekDate)
+                          ))
     })
     
     # Update tab 1 dates list if station selection changes; select most recent
