@@ -80,11 +80,15 @@ data_fpath <- paste(Z_drive,
                     "WaterQuality", 
                     "Shiny", 
                     "discrete_data.rda", sep = "/")
+site_fpath <- paste(Z_drive, 
+                    "MarinePortal", 
+                    "WaterQuality", 
+                    "Shiny", 
+                    "marine_sites.txt", sep = "/")
 
 # Load site data downloaded from Monitoring Portal
 load_site <- function() {
-  fpath <- here("data", "marine_sites.txt")
-  read_tsv(fpath, 
+  read_tsv(site_fpath, 
            col_types = cols(`Site ID` = col_character(), 
                             `Site Name` = col_character(), 
                             Locator = col_character(), 
