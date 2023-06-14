@@ -94,7 +94,7 @@ update_site <- function() {
     Sys.setenv(site_pw = getPass::getPass(msg = "Enter password"))
   }
   
-  webpage <- "http://dnrp-apps2/Monitoring-Portal/Sites?SiteType=254&pageSize=1000"
+  webpage <- "http://dnrp-apps2/Monitoring-Portal/Sites?SiteType=2&pageSize=1000"
   
   tt <- RCurl::getURL(webpage, 
                       userpwd = paste(Sys.getenv("site_user"), 
