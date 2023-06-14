@@ -340,7 +340,8 @@ output$plot_oss_P <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "Orthophosphate P (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 
@@ -382,7 +383,8 @@ output$plot_oss_TotalP <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "Total P (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 
@@ -424,7 +426,8 @@ output$plot_oss_NH3 <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "Ammonia N (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 
@@ -466,7 +469,8 @@ output$plot_oss_NNN <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "Nitrate + nitrite N (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
     if (nrow(p$data) > 0) {
       p <- p + 
@@ -508,7 +512,8 @@ output$plot_oss_TotalN <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "Total N (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 
@@ -550,7 +555,8 @@ output$plot_oss_TSS <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "TSS (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} +  
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 
@@ -838,7 +844,8 @@ output$plot_oss_Si <- renderPlotly({
     labs(x = "Depth (m)", 
          y = "Silica (mg/L)") + 
     coord_flip() + 
-    {if (input$log) scale_y_continuous(trans = "log")} + 
+    {if (input$log) scale_y_continuous(trans = "log", 
+                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 

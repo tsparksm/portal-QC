@@ -16,7 +16,8 @@ output$plot_wb <- renderPlotly({
     labs(x = "Depth (m)", 
          y = parm_units$Label[parm_units$Parameter == input$parm_3]) + 
     coord_flip() + 
-    {if (input$log & (input$parm_3 %in% parms_log)) scale_y_continuous(trans = "log")} + 
+    {if (input$log & (input$parm_3 %in% parms_log)) scale_y_continuous(trans = "log", 
+                                                                       labels = scales::number_format(accuracy = 0.001))} + 
     scale_x_reverse()
   if (nrow(p$data) > 0) {
     p <- p + 
